@@ -42,15 +42,17 @@ fftw_complex * FastFT::fftSolve(IODE* ODE, int N ) {
 
 	//calcing coefficients for next fft
 	for(int ii=1; ii < N ; ++ii) {
-		EFieldCoefs[ii][1] = ChargeDensityCoefs[ii][0]/(-1.*k_n); 		
-		EFieldCoefs[ii][0] = ChargeDensityCoefs[ii][1]/(k_n); 		
+		EFieldCoefs[ii][1] = (4./N) * ChargeDensityCoefs[ii][0]/(-1.*k_n); 		
+		EFieldCoefs[ii][0] = (4./N) * ChargeDensityCoefs[ii][1]/(k_n); 		
 	}
+
+	//set offst by a factor 1/4, ensure graph will be centred around 0
+	//normalisation occured above 4./N, just constant offset needed
+	EFieldCoefs[0][0] = 1/4.;
 
 	//release the memoy
 	fftw_free(ChargeDensityCoefs);
 
-	//cheat -- set offst by a factor N/8, ensure graph will be centred around 0
-	EFieldCoefs[0][0] = 0.25*N/4;
 	
 	//do fft -- populate EField
 	fftw_execute(q); 
@@ -62,6 +64,8 @@ fftw_complex * FastFT::fftSolve(IODE* ODE, int N ) {
 	fftw_destroy_plan(q);
 
 	cout<< "E(x) by Fourier Transform method "<<endl;
+	
+
 	return EField;
 }
 

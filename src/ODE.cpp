@@ -72,7 +72,7 @@ double dVdx::eval(double *CoOrd){
 	for(int i=0;i<E.n_rows;i++){
 		
 		if(E(i,0) - CoOrd[0] < diff ){
-			diff = abs(CoOrd[0] -E(i,0));
+			diff = std::abs(CoOrd[0] -E(i,0));
 			BestValIndex = i;
 		}
 	}

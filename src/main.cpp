@@ -16,7 +16,7 @@ mat negateEField(mat E){
 
 void display(){
 	cout<<"Plotting Results..."<<endl;
-	system("python MyPlot.py EField.txt V.txt Rho.txt FFT_EField.txt");
+	system("python python/multiplot.py outputs/Rho.txt outputs/EField.txt outputs/FFT_EField.txt outputs/V.txt ");
 }
 
 void PrintFile(std::string T, mat Res){
@@ -85,21 +85,26 @@ int main(){
 
 	//Differential Equation instantiated dE/dx = ρ(x)
 	IODE *rho = new dEdx(1.); 
-	PrintFile("Rho.txt",rho,nSteps);
+	
+	//generate data for ρ(x) which is 
+	//defined as 0 until x=1 and then a constant after,
+	//in this case dE/dx = ρ(1)
+	PrintFile("outputs/Rho.txt",rho,nSteps);
 
-	//Fourier Solver
+	//Fourier Solver -- solving ∫ dE = ∫ ρ(1) dx by fourier methods
 	FastFT fourierSolver;
 	fftw_complex *FFTEField = fourierSolver.fftSolve(rho, nSteps);
-	PrintFile("FFT_EField.txt",FFTEField,nSteps);
+	PrintFile("outputs/FFT_EField.txt",FFTEField,nSteps);
 
-	//StepEngine; implicitly utilizes rk4 
+	//StepEngine; implicitly utilizes rk4 -- 
+	//solving ∫ dE = ∫ ρ(1) dx by incrimental methods
 	StepEngine* Stepper = new StepEngine(rho, StepSize,nSteps);
 
 	//stepper results stored in matrix 
 	mat EField = Stepper->run();
 
 	//E Matrix printed to file 
-	PrintFile("EField.txt",EField);
+	PrintFile("outputs/EField.txt",EField);
 
 	//Negate the E values while keeping the x constant
 	mat minusE = negateEField(EField);
@@ -114,7 +119,7 @@ int main(){
 	mat V = Stepper->run();
 
 	//V Matrix printed to file 
-	PrintFile("V.txt",V);
+	PrintFile("outputs/V.txt",V);
 
 	//display the results via python's matplotlib
 	display();
